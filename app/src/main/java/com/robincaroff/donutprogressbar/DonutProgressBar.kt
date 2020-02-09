@@ -58,16 +58,21 @@ open class DonutProgressBar @JvmOverloads constructor(
     var progress
         get() = _progress
         set(value) {
-            _progress = value
-            invalidate()
+            val fixedValue = if (value <= _maxProgress) value else _maxProgress
+            if (_progress != fixedValue) {
+                _progress = fixedValue
+                invalidate()
+            }
         }
 
     private var _maxProgress = 100f
     var maxProgress
         get() = _maxProgress
         set(value) {
-            _maxProgress = value
-            invalidate()
+            if (_maxProgress != value) {
+                _maxProgress = value
+                invalidate()
+            }
         }
 
     private var progressEndAngle: Float = 0.0f
