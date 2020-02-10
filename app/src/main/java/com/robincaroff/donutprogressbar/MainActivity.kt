@@ -4,8 +4,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.*
+import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ScopedAppActivity() {
+
+    private val startingTime = Date().time
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,12 +25,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateProgress() {
-        Handler().postDelayed( {
-            if(donutprogressbar_main.progress < PROGRESS_TARGET) {
-                donutprogressbar_main.progress++
-                updateProgress()
+        launch {
+            withContext(Dispatchers.Default) {
+                delay(UPDATE_DELAY_MILLISECONDS)
+
+                val elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(Date().time - startingTime)
+                withContext(Dispatchers.Main) {
+                    if (donutprogressbar_main.progress < PROGRESS_TARGET) {
+                        donutprogressbar_main.progress = elapsedSeconds.toFloat()
+                        updateProgress()
+                    }
+                }
             }
-        }, UPDATE_DELAY_MILLISECONDS)
+        }
     }
 
     companion object {
